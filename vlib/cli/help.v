@@ -15,7 +15,7 @@ fn help_flag(with_abbrev bool) Flag {
 		flag: .bool
 		name: 'help'
 		abbrev: sabbrev
-		description: 'Prints help information'
+		description: 'Prints help information.'
 	}
 }
 
@@ -23,7 +23,7 @@ fn help_cmd() Command {
 	return Command{
 		name: 'help'
 		usage: '<command>'
-		description: 'Prints help information'
+		description: 'Prints help information.'
 		execute: print_help_for_command
 	}
 }
@@ -42,7 +42,7 @@ fn print_help_for_command(help_cmd Command) ? {
 			}
 			if !found {
 				args := help_cmd.args.join(' ')
-				print('invalid command: $args')
+				print('Invalid command: $args')
 				return
 			}
 		}
@@ -63,6 +63,9 @@ fn (cmd Command) help_message() string {
 	if cmd.commands.len > 0 {
 		help += ' [commands]'
 	}
+	for i in 0 .. cmd.required_args {
+		help += ' <arg$i>'
+	}
 	if cmd.usage.len > 0 {
 		help += ' $cmd.usage'
 	}
@@ -72,7 +75,7 @@ fn (cmd Command) help_message() string {
 	}
 	mut abbrev_len := 0
 	mut name_len := min_description_indent_len
-	if cmd.has_abbrev_flags() {
+	if cmd.flags.have_abbrev() {
 		for flag in cmd.flags {
 			abbrev_len = max(abbrev_len, flag.abbrev.len + spacing + 1) // + 1 for '-' in front
 			name_len = max(name_len, abbrev_len + flag.name.len + spacing + 2) // + 2 for '--' in front
@@ -92,10 +95,10 @@ fn (cmd Command) help_message() string {
 		help += 'Flags:\n'
 		for flag in cmd.flags {
 			mut flag_name := ''
-			if flag.abbrev != '' && cmd.has_abbrev_flags() {
+			if flag.abbrev != '' && cmd.flags.have_abbrev() {
 				abbrev_indent := ' '.repeat(abbrev_len - flag.abbrev.len - 1) // - 1 for '-' in front
 				flag_name = '-$flag.abbrev$abbrev_indent--$flag.name'
-			} else if cmd.has_abbrev_flags() {
+			} else if cmd.flags.have_abbrev() {
 				abbrev_indent := ' '.repeat(abbrev_len)
 				flag_name = '$abbrev_indent--$flag.name'
 			} else {
@@ -144,7 +147,7 @@ fn pretty_description(s string, indent_len int) string {
 		mut i := chars_per_line - 2
 		mut j := 0
 		for ; i < line.len; i += chars_per_line - 2 {
-			for line.str[i] != ` ` {
+			for line[i] != ` ` {
 				i--
 			}
 			// indent was already done the first iteration
